@@ -2,9 +2,17 @@
 
 module.exports = {
   content: [],
-  content: ['./App.{js,jsx,ts,tsx}', './<custom directory>/**/*.{js,jsx,ts,tsx}'],
+  content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#19b264',
+        'dark-bg': '#101114',
+        'primary-bg': '#1A1B1E',
+        'secondary-bg': '#24262A',
+        'card-bg': '#25282C',
+      },
+    },
   },
   plugins: [],
 };
