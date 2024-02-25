@@ -26,9 +26,9 @@ export const CarouselSection = () => {
   };
 
   return (
-    <View style={{ paddingTop: Constants.statusBarHeight }} className="bg-emerald-500">
-      <View className="pt-2 pb-3 items-center justify-center">
-        <View style={{ width: windowWidth / 2.5 }} className="h-10 absolute bg-white rounded-3xl" />
+    <View style={{ paddingTop: Constants.statusBarHeight }} className="bg-zinc-800 min-h-[114px]">
+      <View className="min-h-[52px] pt-2 pb-3 items-center justify-center">
+        <View style={{ width: windowWidth / 2.5 }} className="h-10 absolute top-4 bg-teal-700 rounded-3xl" />
 
         <Carousel
           ref={carouselRef}
@@ -36,7 +36,7 @@ export const CarouselSection = () => {
           vertical={false}
           data={config?.markets || []}
           sliderWidth={windowWidth}
-          itemWidth={windowWidth / 2.2}
+          itemWidth={windowWidth / 2.5}
           onScroll={handleScrollCarousel}
           shouldOptimizeUpdates={true}
           inactiveSlideOpacity={1}
@@ -44,9 +44,7 @@ export const CarouselSection = () => {
           renderItem={({ item, index }) => {
             return (
               <Pressable className="py-3 top-0.5" onPress={() => handlePress(index)}>
-                <Text style={{ color: index === activeIndex ? 'black' : 'white' }} className="text-lg text-center">
-                  {item}
-                </Text>
+                <Text className="text-lg text-white text-center">{item}</Text>
               </Pressable>
             );
           }}
