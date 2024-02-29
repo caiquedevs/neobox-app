@@ -1,7 +1,9 @@
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Product } from '../interfaces/product';
 import { Config } from '../interfaces/config';
-import { ReplacementFormData } from '../components/FormReplacement';
+import { CartFormData } from '../components/FormReplacement';
+import * as Network from 'expo-network';
+import { Replacement } from '../interfaces/replacement';
 
 interface Props {
   children: React.ReactNode;
@@ -20,10 +22,17 @@ interface GlobalContextProps {
   activeIndex: number;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   // ---------------
-  stock: ReplacementFormData[];
-  setStock: React.Dispatch<React.SetStateAction<ReplacementFormData[]>>;
+  cart: CartFormData[];
+  setCart: React.Dispatch<React.SetStateAction<CartFormData[]>>;
+  // ---------------
+  network: { connection: boolean; ready: boolean };
+  setNetwork: React.Dispatch<React.SetStateAction<{ connection: boolean; ready: boolean }>>;
+  // ---------------
+  replacement: Replacement[];
+  setReplacement: React.Dispatch<React.SetStateAction<Replacement[]>>;
   // ---------------
   handleChangeMarket: (index: number, arrProducts?: Product[], arrMarkets?: string[]) => void;
+  verifyNetwork: () => Promise<boolean>;
 }
 
 const GLobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -33,7 +42,9 @@ export const GlobalProvider = ({ children }: Props) => {
   const [marketProducts, setMarketProducts] = React.useState<Product[]>([]);
   const [config, setConfig] = React.useState<Config | null>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const [stock, setStock] = React.useState<ReplacementFormData[]>([]);
+  const [cart, setCart] = React.useState<CartFormData[]>([]);
+  const [network, setNetwork] = React.useState({ connection: false, ready: false });
+  const [replacement, setReplacement] = React.useState<Replacement[]>([]);
 
   const handleChangeMarket = (
     index: number,
@@ -43,9 +54,23 @@ export const GlobalProvider = ({ children }: Props) => {
     const argProduts = arrProducts || products;
     const argMarkets = arrMarkets || config?.markets;
 
-    const filtered = argProduts.filter((product) => product.market === argMarkets?.[index]);
+    const filtered = argProduts?.filter((product) => product.market === argMarkets?.[index]) || [];
     setMarketProducts(filtered);
   };
+
+  const verifyNetwork = async (): Promise<boolean> => {
+    const status = await Network.getNetworkStateAsync();
+    return Boolean(status?.isConnected);
+  };
+
+  React.useEffect(() => {
+    (async () => {
+      const connection = await verifyNetwork();
+      setNetwork({ connection, ready: true });
+    })();
+
+    return () => {};
+  }, []);
 
   return (
     <GLobalContext.Provider
@@ -58,9 +83,14 @@ export const GlobalProvider = ({ children }: Props) => {
         setActiveIndex,
         marketProducts,
         setMarketProducts,
-        stock,
-        setStock,
+        cart,
+        setCart,
         handleChangeMarket,
+        verifyNetwork,
+        network,
+        setNetwork,
+        replacement,
+        setReplacement,
       }}
     >
       {children}

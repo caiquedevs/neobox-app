@@ -1,37 +1,86 @@
 import React from 'react';
-import { Keyboard, View } from 'react-native';
+import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { CarouselSection } from '../components/Carousel';
 import { ProductListSection } from '../components/ProductList';
-import { fetchProducts } from '../services/productService';
+import { fetchPurchaseList, fetchReplacements } from '../services/productService';
 import { fetchConfig } from '../services/configService';
 import { useGlobalContext } from '../context/GlobalContext';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import SwipeModal, { SwipeModalProps } from '../components/SwipeModal';
 import { Product } from '../interfaces/product';
-import { FormReplacement, ReplacementFormData } from '../components/FormReplacement';
-import { getStorage } from '../utils/storage';
+import { FormReplacement, CartFormData } from '../components/FormReplacement';
+import { asyncStorage } from '../utils/storage';
+import { Config } from '../interfaces/config';
+import { Footer } from '../components/Footer';
+import { Replacement } from '../interfaces/replacement';
+import { BtnUpload } from '../components/BtnUpload';
+import { useToast } from 'react-native-toast-notifications';
 
-type Props = {};
-
-export const HomeScreen = (props: Props) => {
+export const HomeScreen = () => {
+  const toast = useToast();
+  const storage = asyncStorage();
   const modalRef = React.useRef<SwipeModalProps>(null);
 
-  const { setProducts, setConfig, handleChangeMarket, setStock } = useGlobalContext();
+  const { setProducts, setConfig, setCart, setReplacement, handleChangeMarket, network } = useGlobalContext();
 
   React.useEffect(() => {
-    Promise.all([fetchProducts(), fetchConfig(), getStorage('stock')])
-      .then(([productsResult, configResult, stockResult]) => {
-        setProducts(productsResult);
-        setConfig(configResult);
+    if (!network.ready || network.connection) return;
 
-        handleChangeMarket(0, productsResult, configResult.markets);
-        setStock((stockResult as ReplacementFormData[]) || []);
+    const offlinePromisses = [
+      storage.get('cart'),
+      storage.get('replacements'),
+      storage.get('products'),
+      storage.get('config'),
+    ];
+
+    Promise.all(offlinePromisses)
+      .then(([cartPersistedResult, replacementPersistedResult, productPersistedResult, configPersistedResult]) => {
+        console.log('Has error stockPersistedResult', cartPersistedResult instanceof Error);
+        const cart = cartPersistedResult as CartFormData[];
+        const product = productPersistedResult as Product[];
+        const config = configPersistedResult as Config;
+        const replacement = replacementPersistedResult as Replacement[];
+
+        setCart(cart || []);
+        setProducts(product || []);
+        setConfig(config || []);
+        setReplacement(replacement || []);
+
+        handleChangeMarket(0, product, config?.markets);
       })
-      .catch(() => alert('Erro ao buscar dados'));
+      .catch((err) => {
+        toast.show('Houve um erro ao tentar realizar essa ação', { type: 'danger' });
+      });
 
     return () => {};
-  }, []);
+  }, [network]);
+
+  React.useEffect(() => {
+    if (!network.ready || !network.connection) return;
+
+    const onlinePromisses = [fetchPurchaseList(), fetchConfig(), fetchReplacements(), storage.get('cart')];
+
+    Promise.all(onlinePromisses)
+      .then(([productsResult, configResult, replacementResult, cartPersistedResult = []]) => {
+        storage.set('products', productsResult);
+        storage.set('config', configResult);
+        storage.set('replacements', replacementResult);
+
+        setCart(cartPersistedResult);
+
+        setProducts(productsResult);
+        setConfig(configResult);
+        setReplacement(replacementResult);
+
+        handleChangeMarket(0, productsResult, configResult.markets);
+      })
+      .catch((err) => {
+        toast.show('Houve um erro ao tentar realizar essa ação', { type: 'danger' });
+      });
+
+    return () => {};
+  }, [network]);
 
   return (
     <GestureHandlerRootView className="w-full flex-1 bg-red-500">
@@ -43,6 +92,9 @@ export const HomeScreen = (props: Props) => {
       <SwipeModal ref={modalRef} height="auto" openPosition={0}>
         {(product: Product) => <FormReplacement modalRef={modalRef} product={product} />}
       </SwipeModal>
+
+      <BtnUpload />
+      <Footer />
     </GestureHandlerRootView>
   );
 };

@@ -1,5 +1,5 @@
 import React, { ForwardedRef, forwardRef, useImperativeHandle, useState } from 'react';
-import { View, Dimensions, TouchableOpacity, ViewProps, Pressable } from 'react-native';
+import { View, Dimensions, TouchableOpacity, ViewProps, Pressable, Keyboard } from 'react-native';
 
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -45,45 +45,6 @@ const SwipeModal = ({ style, children, ...props }: Props, ref: ForwardedRef<Swip
   const opacity = useSharedValue(0);
   const displayBackDrop = useSharedValue('none');
 
-  const panGesture = Gesture.Pan()
-    .onStart((event) => {
-      if (props.preventSwipe) return;
-      if (props.gestureStart) runOnJS(props.gestureStart)();
-    })
-    .onUpdate((event) => {
-      if (event.translationY < 0 || props.preventSwipe) return;
-      posY.value = openPosition + event.translationY;
-    })
-    .onEnd((event) => {
-      if (props.preventSwipe) return;
-
-      if (event.translationY >= 50) {
-        posY.value = withSpring(heightDevice, { damping: 100, stiffness: 1000 });
-        opacity.value = withSpring(0, { damping: 100, stiffness: 1000 }, () => {
-          displayBackDrop.value = 'none';
-        });
-      } else {
-        posY.value = withSpring(openPosition, { damping: 100, stiffness: 1000 });
-      }
-    });
-
-  const stylesAnimationModal = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: posY.value,
-        },
-      ],
-    };
-  });
-
-  const stylesAnimationBackdrop = useAnimatedStyle(() => {
-    return {
-      opacity: Number(opacity.value),
-      display: displayBackDrop.value as 'flex' | 'none',
-    };
-  });
-
   const openModal = (data?: any) => {
     if (displayBackDrop.value === 'flex') return;
 
@@ -106,8 +67,49 @@ const SwipeModal = ({ style, children, ...props }: Props, ref: ForwardedRef<Swip
     });
 
     setPayload(null);
-    props.callbackClose?.();
+    Keyboard.dismiss();
   };
+
+  const panGesture = Gesture.Pan()
+    .onStart((event) => {
+      if (props.preventSwipe) return;
+      if (props.gestureStart) runOnJS(props.gestureStart)();
+    })
+    .onUpdate((event) => {
+      if (event.translationY < 0 || props.preventSwipe) return;
+      posY.value = openPosition + event.translationY;
+    })
+    .onEnd((event) => {
+      if (props.preventSwipe) return;
+
+      if (event.translationY >= 50) {
+        posY.value = withSpring(heightDevice, { damping: 100, stiffness: 1000 });
+        opacity.value = withSpring(0, { damping: 100, stiffness: 1000 }, () => {
+          displayBackDrop.value = 'none';
+        });
+
+        runOnJS(closeModal)();
+      } else {
+        posY.value = withSpring(openPosition, { damping: 100, stiffness: 1000 });
+      }
+    });
+
+  const stylesAnimationModal = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: posY.value,
+        },
+      ],
+    };
+  });
+
+  const stylesAnimationBackdrop = useAnimatedStyle(() => {
+    return {
+      opacity: Number(opacity.value),
+      display: displayBackDrop.value as 'flex' | 'none',
+    };
+  });
 
   const getPayload = () => {
     return payload;

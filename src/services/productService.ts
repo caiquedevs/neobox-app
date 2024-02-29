@@ -1,8 +1,42 @@
+import { CartFormData } from '../components/FormReplacement';
 import { baseUrl } from '../utils/constants';
 
-export const fetchProducts = async () => {
-  return fetch(`${baseUrl}/stock`)
-    .then((response) => response.json())
+export const fetchPurchaseList = async () => {
+  return fetch(`${baseUrl}/replacement?purchase-list=true`)
+    .then((response) => {
+      if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+      return response.json();
+    })
     .then((response) => response)
-    .catch((error) => error);
+    .catch((error) => {
+      throw new Error('Erro na requisicao');
+    });
+};
+
+export const fetchReplacements = async () => {
+  return fetch(`${baseUrl}/replacement`)
+    .then((response) => {
+      if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+      return response.json();
+    })
+    .then((response) => response)
+    .catch((error) => {
+      throw new Error('Erro na requisicao');
+    });
+};
+
+export const createReplacement = async (products: CartFormData[]) => {
+  return fetch(`${baseUrl}/replacement`, {
+    method: 'POST',
+    body: JSON.stringify(products),
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+      return response.json();
+    })
+    .then((response) => response)
+    .catch((error) => {
+      throw new Error('Erro na requisicao');
+    });
 };
