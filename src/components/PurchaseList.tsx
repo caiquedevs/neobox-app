@@ -13,13 +13,13 @@ type Props = {
   modalRef: React.RefObject<SwipeModalProps>;
 };
 
-export const ProductListSection = (props: Props) => {
+export const PurchaseListSection = (props: Props) => {
   const toast = useToast();
   const storage = asyncStorage();
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const { marketProducts, verifyNetwork, setCart, setProducts, setConfig, setReplacement } = useGlobalContext();
+  const { marketProducts, verifyNetwork, setPurchaseList, setConfig, setReplacement } = useGlobalContext();
   const listViewData = marketProducts.map((product) => ({ key: product._id, product }));
 
   const onRefresh = async () => {
@@ -36,7 +36,7 @@ export const ProductListSection = (props: Props) => {
         storage.set('config', configResult);
         storage.set('replacements', replacementResult);
 
-        setProducts(productsResult);
+        setPurchaseList(productsResult);
         setConfig(configResult);
         setReplacement(replacementResult);
 

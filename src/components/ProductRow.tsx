@@ -21,21 +21,21 @@ const ProductRow = ({ product, onPress }: Props) => {
 
   const pricePaid = haveInCart
     ? Number(haveInCart.pricePaid)
-    : product.stock.products.length
-    ? product.stock.products[product.stock.products.length - 1][type].pricePaid
+    : product.stock.products?.length
+    ? product.stock.products[product.stock.products?.length - 1][type].pricePaid
     : 'N/A';
 
   const qtd = haveInCart
     ? haveInCart.qtd
     : product.hasBurden
-    ? Math.round((product.max! - product.stock.qtd) / product.burden.burdenUnits!)
-    : product.max! - product.stock.qtd;
+    ? Math.round(product.max! / (product.burden?.burdenUnits || 0))
+    : product.max;
 
   const weight = haveInCart
-    ? product[haveInCart.productType!].productWeight
+    ? product[haveInCart.productType!]?.productWeight
     : product.hasBurden
-    ? product.burden.productWeight
-    : product.unit.productWeight;
+    ? product.burden?.productWeight
+    : product.unit?.productWeight;
 
   return (
     <Pressable
@@ -46,7 +46,7 @@ const ProductRow = ({ product, onPress }: Props) => {
     >
       <View className="w-14 h-14 bg-white rounded-lg overflow-hidden">
         <Image
-          uri={haveInCart ? product[haveInCart.productType!].uri : product.burden.uri || product.unit.uri}
+          uri={haveInCart ? product[haveInCart.productType!]?.uri : product.burden?.uri || product.unit?.uri}
           imgClass="w-full h-full"
         />
       </View>
@@ -57,7 +57,9 @@ const ProductRow = ({ product, onPress }: Props) => {
         </Text>
 
         <View className="flex-row justify-between">
-          <Text className="text-black text-lg">{qtd}x</Text>
+          <Text className="text-black text-lg">
+            {qtd}x - {product.market}
+          </Text>
           <Text className="text-black text-lg">
             {pricePaid?.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}{' '}
             {haveInCart ? `/ ${haveInCart.total?.toLocaleString('pt-br', { minimumFractionDigits: 2 })}` : null}

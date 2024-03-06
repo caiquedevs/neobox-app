@@ -26,7 +26,7 @@ export interface CartFormData {
   productType: ProductType | undefined;
   qtd: string | undefined;
   total?: number;
-  burdenUnits?: number;
+  burdenUnits: number;
 }
 
 const initialValues: CartFormData = {
@@ -34,7 +34,7 @@ const initialValues: CartFormData = {
   pricePaid: undefined as string | undefined,
   productType: undefined as ProductType | undefined,
   qtd: undefined as string | undefined,
-  burdenUnits: undefined,
+  burdenUnits: 0,
   total: 0,
 };
 
@@ -71,7 +71,7 @@ export const FormReplacement = (props: Props) => {
       return;
     }
 
-    const lengthProducts = product?.stock.products.length;
+    const lengthProducts = product?.stock.products?.length;
     const pricePaid = lengthProducts ? product.stock.products[lengthProducts - 1][productType].pricePaid : '0.00';
 
     const qtd =
@@ -103,7 +103,7 @@ export const FormReplacement = (props: Props) => {
     const pricePaid = values.pricePaid || product?.pricePaid;
     const total = Number(pricePaid) * Number(qtd);
 
-    const payload = {
+    const payload: CartFormData = {
       _id: product?._id,
       burdenUnits: product?.burden?.burdenUnits || 0,
       productType: values.productType,
@@ -137,7 +137,7 @@ export const FormReplacement = (props: Props) => {
 
     if (!currentProduct || editData) return;
 
-    const lengthProducts = currentProduct.stock.products.length;
+    const lengthProducts = currentProduct.stock.products?.length;
     const productType = currentProduct.hasBurden ? 'burden' : 'unit';
 
     const qtd =

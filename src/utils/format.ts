@@ -1,8 +1,8 @@
 import { CartFormData } from '../components/FormReplacement';
 import { ProductType } from '../interfaces/product';
-import { Replacement } from '../interfaces/replacement';
+import { ReplacementApp } from '../interfaces/replacementApp';
 
-export const formatFormReplacementData = (replacements: Replacement[]): CartFormData[] => {
+export const formatFormReplacementData = (replacements: ReplacementApp[]): CartFormData[] => {
   const formated = replacements.map((replacement) => {
     const productType = replacement.productType as ProductType;
     const qtd = productType === 'unit' ? replacement.qtd : replacement.qtd / replacement.burdenUnits;

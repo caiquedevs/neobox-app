@@ -3,15 +3,15 @@ import { Product } from '../interfaces/product';
 import { Config } from '../interfaces/config';
 import { CartFormData } from '../components/FormReplacement';
 import * as Network from 'expo-network';
-import { Replacement } from '../interfaces/replacement';
+import { ReplacementApp } from '../interfaces/replacementApp';
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface GlobalContextProps {
-  products: Product[];
-  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  purchaseList: Product[];
+  setPurchaseList: React.Dispatch<React.SetStateAction<Product[]>>;
   // ---------------
   marketProducts: Product[];
   setMarketProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -28,33 +28,26 @@ interface GlobalContextProps {
   network: { connection: boolean; ready: boolean };
   setNetwork: React.Dispatch<React.SetStateAction<{ connection: boolean; ready: boolean }>>;
   // ---------------
-  replacement: Replacement[];
-  setReplacement: React.Dispatch<React.SetStateAction<Replacement[]>>;
+  replacement: ReplacementApp[];
+  setReplacement: React.Dispatch<React.SetStateAction<ReplacementApp[]>>;
   // ---------------
-  handleChangeMarket: (index: number, arrProducts?: Product[], arrMarkets?: string[]) => void;
+  handleChangeMarket: (index: number, products: Product[], markets: string[]) => void;
   verifyNetwork: () => Promise<boolean>;
 }
 
 const GLobalContext = createContext<GlobalContextProps | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: Props) => {
-  const [products, setProducts] = React.useState<Product[]>([]);
+  const [purchaseList, setPurchaseList] = React.useState<Product[]>([]);
   const [marketProducts, setMarketProducts] = React.useState<Product[]>([]);
   const [config, setConfig] = React.useState<Config | null>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [cart, setCart] = React.useState<CartFormData[]>([]);
   const [network, setNetwork] = React.useState({ connection: false, ready: false });
-  const [replacement, setReplacement] = React.useState<Replacement[]>([]);
+  const [replacement, setReplacement] = React.useState<ReplacementApp[]>([]);
 
-  const handleChangeMarket = (
-    index: number,
-    arrProducts: Product[] | undefined = undefined,
-    arrMarkets: string[] | undefined = undefined
-  ) => {
-    const argProduts = arrProducts || products;
-    const argMarkets = arrMarkets || config?.markets;
-
-    const filtered = argProduts?.filter((product) => product.market === argMarkets?.[index]) || [];
+  const handleChangeMarket = (index: number, products: Product[], markets: string[]) => {
+    const filtered = products?.filter((product) => product.market === markets?.[index]) || [];
     setMarketProducts(filtered);
   };
 
@@ -75,8 +68,8 @@ export const GlobalProvider = ({ children }: Props) => {
   return (
     <GLobalContext.Provider
       value={{
-        products,
-        setProducts,
+        purchaseList,
+        setPurchaseList,
         config,
         setConfig,
         activeIndex,

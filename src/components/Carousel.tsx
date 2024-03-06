@@ -6,7 +6,7 @@ import Carousel from 'react-native-snap-carousel';
 import { useGlobalContext } from '../context/GlobalContext';
 
 export const CarouselSection = () => {
-  const { activeIndex, setActiveIndex, config, handleChangeMarket } = useGlobalContext();
+  const { activeIndex, setActiveIndex, config, handleChangeMarket, purchaseList } = useGlobalContext();
 
   const carouselRef = React.useRef<Carousel<any>>(null);
   const windowWidth = Dimensions.get('window').width;
@@ -15,14 +15,9 @@ export const CarouselSection = () => {
     carouselRef.current?.snapToItem(index);
   };
 
-  const handleScrollCarousel = ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset } = nativeEvent;
-    const index = Math.round(contentOffset.x / (windowWidth / 2));
-
-    if (index !== activeIndex) {
-      handleChangeMarket(index);
-      setActiveIndex(index);
-    }
+  const handleScrollCarousel = (index: number) => {
+    setActiveIndex(index);
+    handleChangeMarket(index, purchaseList || [], config?.markets || []);
   };
 
   return (
@@ -37,7 +32,7 @@ export const CarouselSection = () => {
           data={config?.markets || []}
           sliderWidth={windowWidth}
           itemWidth={windowWidth / 2.5}
-          onScroll={handleScrollCarousel}
+          onScrollIndexChanged={handleScrollCarousel}
           shouldOptimizeUpdates={true}
           inactiveSlideOpacity={1}
           enableSnap={true}

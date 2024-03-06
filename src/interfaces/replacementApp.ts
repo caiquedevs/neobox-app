@@ -1,4 +1,4 @@
-export interface Replacement {
+export interface ReplacementApp {
   _id: string | undefined;
   createdAt: string;
   updatedAt: string;
