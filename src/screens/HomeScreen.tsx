@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { CarouselSection } from '../components/Carousel';
-import { PurchaseListSection } from '../components/PurchaseList';
+import { PurchaseList } from '../components/PurchaseList';
 import { fetchPurchaseList, fetchReplacements } from '../services/productService';
 import { fetchConfig } from '../services/configService';
 import { useGlobalContext } from '../context/GlobalContext';
@@ -86,7 +86,7 @@ export const HomeScreen = () => {
     <GestureHandlerRootView className="w-full flex-1 bg-red-500">
       <View className="w-full h-full bg-white">
         <CarouselSection />
-        <PurchaseListSection modalRef={modalRef} />
+        <PurchaseList modalRef={modalRef} />
       </View>
 
       <SwipeModal ref={modalRef} height="auto" openPosition={0}>

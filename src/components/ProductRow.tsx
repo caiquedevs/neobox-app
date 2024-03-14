@@ -29,7 +29,7 @@ const ProductRow = ({ product, onPress }: Props) => {
     ? haveInCart.qtd
     : product.hasBurden
     ? Math.round(product.max! / (product.burden?.burdenUnits || 0))
-    : product.max;
+    : product.max! - product.stock.qtd;
 
   const weight = haveInCart
     ? product[haveInCart.productType!]?.productWeight
@@ -58,7 +58,7 @@ const ProductRow = ({ product, onPress }: Props) => {
 
         <View className="flex-row justify-between">
           <Text className="text-black text-lg">
-            {qtd}x - {product.market}
+            {qtd}x - {product.stock.qtd}
           </Text>
           <Text className="text-black text-lg">
             {pricePaid?.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}{' '}

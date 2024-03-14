@@ -13,13 +13,14 @@ type Props = {
   modalRef: React.RefObject<SwipeModalProps>;
 };
 
-export const PurchaseListSection = (props: Props) => {
+export const PurchaseList = (props: Props) => {
   const toast = useToast();
   const storage = asyncStorage();
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const { marketProducts, verifyNetwork, setPurchaseList, setConfig, setReplacement } = useGlobalContext();
+  const { marketProducts, verifyNetwork, setPurchaseList, setConfig, setReplacement, activeIndex, handleChangeMarket } =
+    useGlobalContext();
   const listViewData = marketProducts.map((product) => ({ key: product._id, product }));
 
   const onRefresh = async () => {
@@ -31,15 +32,16 @@ export const PurchaseListSection = (props: Props) => {
     const onlinePromisses = [fetchPurchaseList(), fetchConfig(), fetchReplacements()];
 
     Promise.all(onlinePromisses)
-      .then(([productsResult, configResult, replacementResult]) => {
-        storage.set('products', productsResult);
+      .then(([purchaseListResult, configResult, replacementResult]) => {
+        storage.set('products', purchaseListResult);
         storage.set('config', configResult);
         storage.set('replacements', replacementResult);
 
-        setPurchaseList(productsResult);
+        setPurchaseList(purchaseListResult);
         setConfig(configResult);
         setReplacement(replacementResult);
 
+        handleChangeMarket(activeIndex, purchaseListResult, configResult.markets);
         setIsRefreshing(false);
       })
       .catch((err) => {
